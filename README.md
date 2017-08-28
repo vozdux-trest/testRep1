@@ -1,7 +1,10 @@
 # testRep1
   a test r e p o s i t o r y  -  this was changed
+  
 new line went here
+
 some more text goes below:
+
 Все просто!
 
 земля на слонах
