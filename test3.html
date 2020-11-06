@@ -1,0 +1,136 @@
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>Музыка - взгляд с торца</title>    
+<style> 
+input[type=number] { width: 50px; }
+input[type=text]   { width: 7%; }
+</style>
+  </head>
+  <body>
+    <button type="button" onclick="f1()">Run</button>
+    <button type="button" onclick="f3()">Stop</button>
+    <button type="button" onclick="f2()">Clear</button>
+    <form id="frm1">
+  Frequency1: <input id="fr1" type="number" value=1>&nbsp&nbsp
+  Radius1: <input id="r1" type="number" value=100>&nbsp&nbsp
+  Rotate: 
+  <input type="radio" name="rotate1" id="rotate1" checked>
+  <label for="rotate1">clockwise</label>
+  <input type="radio" name="rotate1">
+  <label>anticlockwise</label> &nbsp&nbsp
+  Pen size: <input id="penSize1" type="number" value=4>
+  &nbsp&nbsp
+  Color: <input id="color1" type="text" value="green">
+  <br>
+  Frequency2: <input id="fr2" type="number" value=2>&nbsp&nbsp
+  Radius2: <input id="r2" type="number" value=100>&nbsp&nbsp
+  Rotate: 
+  <input type="radio" name="rotate2" id="rotate2">
+  <label>clockwise</label>
+  <input type="radio" name="rotate2" checked>
+  <label>anticlockwise</label> &nbsp&nbsp
+  Pen size: <input id="penSize2" type="number" value=3>
+  &nbsp&nbsp
+  Color: <input id="color2" type="text" value="blue">
+  <br>
+  Frequency3: <input id="fr3" type="number" value=3>&nbsp&nbsp
+  Radius3: <input id="r3" type="number" value=100>&nbsp&nbsp
+  Rotate: 
+  <input type="radio" name="rotate3" id="rotate3" checked>
+  <label>clockwise</label>
+  <input type="radio" name="rotate3">
+  <label>anticlockwise</label> &nbsp&nbsp
+  Pen size: <input id="penSize3" type="number" value=2>
+  &nbsp&nbsp
+  Color: <input id="color3" type="text" value="red">
+  <br>
+  Animation Lag: <input id="lag" type="number" value=1>
+  <input type="checkbox" id="performance" name="performance"> <label for="performance"> Improve performance</label>
+  <br><br>
+	</form>
+    <div id="stage-container" style="width: 900px; height: 700px;"></div>
+<p id="demo"></p>
+    <script src="https://cdn.anychart.com/js/latest/graphics.min.js"></script>
+    <script>
+function sleep(ms) {return new Promise(resolve => setTimeout(resolve, ms));}
+// GraphicsJS code here
+// create a stage
+var br1=0; // break loop flag
+var stage = acgraph.create('stage-container');
+var layer1 = stage.layer();
+layer1.text(150,50).text('If you don\'t know what to do then just press the Run button.');
+var txt1 = stage.text(750,100).color('green');
+var txt2 = stage.text(750,120).color('blue');
+var txt3 = stage.text(750,140).color('red');
+//
+async function f1(){
+var fr1=document.getElementById("fr1").value;
+var r1=Math.trunc(document.getElementById("r1").value);
+var fr2=document.getElementById("fr2").value;
+var r2=Math.trunc(document.getElementById("r2").value);
+var fr3=document.getElementById("fr3").value;
+var r3=Math.trunc(document.getElementById("r3").value);
+var penSize1=document.getElementById("penSize1").value;
+var penSize2=document.getElementById("penSize2").value;
+var penSize3=document.getElementById("penSize3").value;
+var color1=document.getElementById("color1").value;
+var color2=document.getElementById("color2").value;
+var color3=document.getElementById("color3").value;
+var lag=Math.trunc(document.getElementById("lag").value);
+var performance=document.getElementById("performance").checked;
+x0=350;
+y0=350;
+x1=0;x2=0;x3=0;y1=0;y2=0;y3=0;
+xe1=x0+r1;xe2=xe1+r2;xe3=xe2+r3;
+ye1=y0;ye2=y0;ye3=y0;
+k1=1; // rotation direction: 1 - clockwise, -1 - anticlockwise
+if (document.getElementById("rotate1").checked==false){k1=-1;}
+k2=1; // rotation direction for 2nd radius
+if (document.getElementById("rotate2").checked==false){k2=-1;}
+k3=1; // rotation direction for 3rd radius
+if (document.getElementById("rotate3").checked==false){k3=-1;}
+var draw1=true;
+var draw2=true;
+var n1=0;
+var i=1;
+//Run the drawing cycle until all radiuses return to original position
+while (!(x1==xe1 && x2==xe2 && x3==xe3)) 
+// NB, x1/2/3 are whole values at 0 degrees because of cosinus,
+//     so will compare to xe1/2/3, which are wholes.
+  {
+// Find out if we need to draw for each radius - performance
+	if (performance)
+		{if (x1==xe1)
+			{draw1=false;
+		 	if (x2==xe2)
+		 		{draw2=false;}}}
+// Note, angle is in radians
+// Movement of the 1st radius - coordinates of the circle
+	x1 =x0+r1*Math.cos(k1*Math.PI*i/180); 
+	y1 =y0+r1*Math.sin(k1*Math.PI*i/180);
+	if (draw1){layer1.circle(x1,y1,penSize1).fill(color1);}
+	txt1.text('x1=' + Math.round(x1)+' y1='+Math.round(y1)+'  T='+Math.trunc(i/360)+'  '+i+'^');
+// 2nd radius
+	x2 =x1+r2*Math.cos(k2*(fr2/fr1)*Math.PI*i/180);
+	y2 =y1+r2*Math.sin(k2*(fr2/fr1)*Math.PI*i/180);	
+	if (draw2){layer1.circle(x2,y2,penSize2).fill(color2);}
+	txt2.text('x2=' + Math.round(x2)+' y2='+Math.round(y2));
+// 3rd radius
+	x3 =x2+r3*Math.cos(k3*(fr3/fr2)*Math.PI*i/180);
+	y3 =y2+r3*Math.sin(k3*(fr3/fr2)*Math.PI*i/180);	
+	layer1.circle(x3,y3,penSize3).fill(color3);
+	txt3.text('x3=' + Math.round(x3)+' y3='+Math.round(y3));
+//
+	if(i-n1>1){n1=i+1;await sleep(lag);}
+	if(br1==1){br1=0;break;}
+	i++;
+  } 
+}
+function f2() {layer1.removeChildren();
+			   txt1.text('');txt2.text('');txt3.text('');}
+function f3() {br1=1;}
+    </script>
+    ---------end of page----------
+  </body>
+</html>

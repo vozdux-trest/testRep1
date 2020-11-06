@@ -1,0 +1,89 @@
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>Музыка - взгляд с торца</title>    
+  </head>
+  <body>
+    <button type="button" onclick="f1()">Run</button>
+    <button type="button" onclick="f3()">Stop</button>
+    <button type="button" onclick="f2()">Clear</button>
+    <form id="frm1">
+  Frequency1: <input id="fr1" type="number" value=1>&nbsp&nbsp
+  Radius1: <input id="r1" type="number" value=100>&nbsp&nbsp
+  Rotate: 
+  <input type="radio" name="rotate1" id="rotate1" checked>
+  <label>clockwise</label> &nbsp
+  <input type="radio" name="rotate1">
+  <label>anticlockwise</label> <br>
+  Frequency2: <input id="fr2" type="number" value=2>&nbsp&nbsp
+  Radius2: <input id="r2" type="number" value=100>&nbsp&nbsp
+  Rotate: 
+  <input type="radio" name="rotate2" id="rotate2">
+  <label>clockwise</label> &nbsp
+  <input type="radio" name="rotate2" checked>
+  <label>anticlockwise</label> <br>
+  Animation Lag: <input id="lag" type="number" value=10>&nbsp&nbsp
+  Pen size: <input id="penSize" type="number" value=2><br><br>
+	</form>
+    <div id="stage-container" style="width: 900px; height: 600px;"></div>
+<p id="demo"></p>
+    <script src="https://cdn.anychart.com/js/latest/graphics.min.js"></script>
+    <script>
+function sleep(ms) {return new Promise(resolve => setTimeout(resolve, ms));}
+// GraphicsJS code here
+// create a stage
+var br1=0; // break loop flag
+var stage = acgraph.create('stage-container');
+var layer1 = stage.layer();
+layer1.text(150,50).text('If you don\'t know what to do then just press the Run button.');
+var txt1 = stage.text(600,50).color('green');
+var txt2 = stage.text(600,70).color('blue');
+async function f1(){
+//var r1=100;
+//var r2=100;
+var fr1=Math.trunc(document.getElementById("fr1").value);
+var r1=Math.trunc(document.getElementById("r1").value);
+var fr2=Math.trunc(document.getElementById("fr2").value);
+var r2=Math.trunc(document.getElementById("r2").value);
+var lag=Math.trunc(document.getElementById("lag").value);
+var penSize=document.getElementById("penSize").value;
+x0=250;
+y0=250;
+x1=0;x2=0;y1=0;y2=0;
+xe1=x0+r1;xe2=xe1+r2;
+ye1=y0;ye2=y0;
+k1=1; // rotation direction: 1 - clockwise, -1 - anticlockwise
+if (document.getElementById("rotate1").checked==false){k1=-1;}
+k2=1; // rotation direction for the other radius
+if (document.getElementById("rotate2").checked==false){k2=-1;}
+var n1=0;
+var i=1;
+//for (i=0;i<Math.floor((fr1+fr2)/2)*360;i++) 
+//while (!(x1==xe1 && y1==ye1 && x2==xe2 && y2==ye2))
+while (!(x1==xe1 && x2==xe2)) 
+// NB, x1, x2 are whole values at 0 degrees because of cosinus,
+//     so will compare to xe1/ye1, which are wholes.
+  {
+	// Note, angle is in radians
+	x1 =x0+r1*Math.cos(k1*Math.PI*i/180); 
+	y1 =y0+r1*Math.sin(k1*Math.PI*i/180);
+	var c1=layer1.circle(x1,y1,penSize).fill('green');
+	txt1.text('x1=' + Math.round(x1)+' y1='+Math.round(y1)+'  T='+Math.trunc(i/360)+'  '+i+'^');
+	x2 =x1+r2*Math.cos(k2*(fr2/fr1)*Math.PI*i/180);
+	y2 =y1+r2*Math.sin(k2*(fr2/fr1)*Math.PI*i/180);	
+	var c2=layer1.circle(x2,y2,penSize).fill('blue');
+	txt2.text('x2=' + Math.round(x2)+' y2='+Math.round(y2));
+	if(i-n1>1){n1=i+1;await sleep(lag);}
+//	c1.remove();
+//	c2.remove();
+	if(br1==1){br1=0;break;}
+	i++;
+  } 
+}
+function f2() {layer1.removeChildren();
+			   txt1.text('');txt2.text('');}
+function f3() {br1=1;}
+    </script>
+    ---------end of page----------
+  </body>
+</html>
