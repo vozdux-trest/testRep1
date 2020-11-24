@@ -73,6 +73,7 @@ input[type=radio]:checked + label {
   <br>
   Animation Lag: <input id="lag" type="number" value=10>&nbsp&nbsp
   Step: <input id="step2" type="number" value=1>&nbsp&nbsp
+  <input type="checkbox" id="performance" name="performance"> <label for="performance"> Improve performance</label>
   <br><br>
   </form>
 
@@ -173,6 +174,7 @@ if (document.getElementById("rotate4").checked==false){k4=-1;}
 //var step1=Math.abs(document.getElementById("step1").value);
 var step2=Math.abs(document.getElementById("step2").value);
 var lag=Math.trunc(document.getElementById("lag").value);
+var performance=document.getElementById("performance").checked;
 x0=400;
 y0=400;
 x1=0;
@@ -195,6 +197,8 @@ ye4=y0;
 //debugger;
 n1=0;
 var i=step2; 
+var n2=1;
+if (performance) {n2=n2*10;} // re-draw only each 10th time
 
 while (!(x1>=xe1 && x2>=xe2 && x3>=xe3 && x4>=xe4)) 
 // NB, x1, x2 are whole values at 0 degrees because of cosinus,
@@ -229,7 +233,14 @@ while (!(x1>=xe1 && x2>=xe2 && x3>=xe3 && x4>=xe4))
 	if(animate4){polyline4.setAttribute("points",pt4);}
 	text4.innerHTML='x4=' + Math.round(x4)+' y4='+Math.round(y4);
 
-	if(i-n1>1){n1=i+1;await sleep(lag);}
+	if(i-n1>n2)
+   {
+    if(animate1){polyline1.setAttribute("points",pt1);}
+    if(animate2){polyline2.setAttribute("points",pt2);}
+    if(animate3){polyline3.setAttribute("points",pt3);}
+    if(animate4){polyline4.setAttribute("points",pt4);}
+    n1=i+1;await sleep(lag);
+   }
 	if(br1==1){br1=0;break;}
 	i=i+step2;
   }

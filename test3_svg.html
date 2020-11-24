@@ -61,6 +61,7 @@ input[type=radio]:checked + label {
   <br>
   Animation Lag: <input id="lag" type="number" value=10>&nbsp&nbsp
   Step: <input id="step2" type="number" value=1>&nbsp&nbsp
+  <input type="checkbox" id="performance" name="performance"> <label for="performance"> Improve performance</label>
   <br><br>
   </form>
 
@@ -141,6 +142,7 @@ if (document.getElementById("rotate3").checked==false){k3=-1;}
 //var step1=Math.abs(document.getElementById("step1").value);
 var step2=Math.abs(document.getElementById("step2").value);
 var lag=Math.trunc(document.getElementById("lag").value);
+var performance=document.getElementById("performance").checked;
 x0=300;
 y0=300;
 x1=0;
@@ -157,8 +159,11 @@ xe3=xe2+r3;
 ye3=y0;
 
 //debugger;
+br1=0; // clear the break loop flag
 n1=0;
 var i=step2; 
+var n2=1;
+if (performance) {n2=n2*10;} // re-draw only each 10th time
 
 while (!(x1>=xe1 && x2>=xe2 && x3>=xe3)) 
 // NB, x1, x2 are whole values at 0 degrees because of cosinus,
@@ -169,24 +174,30 @@ while (!(x1>=xe1 && x2>=xe2 && x3>=xe3))
 	y1 =y0+r1*Math.sin(k1*Math.PI*i/180);
 	rad1.setAttribute("d","M "+x0+" "+y0+" L "+x1+" "+y1+" Z");
 	pt1=pt1+" "+x1+","+y1;
-	if(animate1){polyline1.setAttribute("points",pt1);}
+	//if(animate1){polyline1.setAttribute("points",pt1);}
 	text1.innerHTML='x1=' + Math.round(x1)+' y1='+Math.round(y1)+'  T='+Math.trunc(i/360)+'  '+i+'^';
 
 	x2 =x1+r2*Math.cos(k2*(fr2/fr1)*Math.PI*i/180);
 	y2 =y1+r2*Math.sin(k2*(fr2/fr1)*Math.PI*i/180);	
 	rad2.setAttribute("d","M "+x1+" "+y1+" L "+x2+" "+y2+" Z");
 	pt2=pt2+" "+x2+","+y2;
-	if(animate2){polyline2.setAttribute("points",pt2);}
+	//if(animate2){polyline2.setAttribute("points",pt2);}
 	text2.innerHTML='x2=' + Math.round(x2)+' y2='+Math.round(y2);
 
 	x3 =x2+r3*Math.cos(k3*(fr3/fr2)*Math.PI*i/180);
 	y3 =y2+r3*Math.sin(k3*(fr3/fr2)*Math.PI*i/180);	
 	rad3.setAttribute("d","M "+x2+" "+y2+" L "+x3+" "+y3+" Z");
 	pt3=pt3+" "+x3+","+y3;
-	if(animate3){polyline3.setAttribute("points",pt3);}
+	//if(animate3){polyline3.setAttribute("points",pt3);}
 	text3.innerHTML='x3=' + Math.round(x3)+' y3='+Math.round(y3);
 
-	if(i-n1>1){n1=i+1;await sleep(lag);}
+	if(i-n1>n2)
+   {
+    if(animate1){polyline1.setAttribute("points",pt1);}
+    if(animate2){polyline2.setAttribute("points",pt2);}
+    if(animate3){polyline3.setAttribute("points",pt3);}
+    n1=i+1;await sleep(lag);
+   }
 	if(br1==1){br1=0;break;}
 	i=i+step2;
   }

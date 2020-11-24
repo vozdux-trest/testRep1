@@ -49,6 +49,7 @@ input[type=radio]:checked + label {
   <br>
   Animation Lag: <input id="lag" type="number" value=10>&nbsp&nbsp
   Step: <input id="step2" type="number" value=1>&nbsp&nbsp
+  <input type="checkbox" id="performance" name="performance"> <label for="performance"> Improve performance</label>
   <br><br>
   </form>
 
@@ -95,6 +96,7 @@ var drawgraph1=document.getElementById("drawgraph1").checked;
 var drawgraph2=document.getElementById("drawgraph2").checked;
 //var step1=Math.abs(document.getElementById("step1").value);
 var step2=Math.abs(document.getElementById("step2").value);
+var performance=document.getElementById("performance").checked;
 polyline1.setAttribute("stroke-width",penSize1);
 polyline1.setAttribute("stroke",color1);
 polyline2.setAttribute("stroke-width",penSize2);
@@ -112,9 +114,12 @@ k1=1; // rotation direction: 1 - clockwise, -1 - anticlockwise
 if (document.getElementById("rotate1").checked==false){k1=-1;}
 k2=1; // rotation direction for the other radius
 if (document.getElementById("rotate2").checked==false){k2=-1;}
-n1=0;
 
+var n1=0;
+br1=0; // clear the break loop flag
 var i=step2; 
+var n2=1;
+if (performance) {n2=n2*10;} // re-draw only each 10th time
 //debugger;
 while (!(x1>=xe1 && x2>=xe2)) 
 // NB, x1, x2 are whole values at 0 degrees because of cosinus,
@@ -125,15 +130,20 @@ while (!(x1>=xe1 && x2>=xe2))
 	y1 =y0+r1*Math.sin(k1*Math.PI*i/180);
 	rad1.setAttribute("d","M "+x0+" "+y0+" L "+x1+" "+y1+" Z");
 	pt1=pt1+" "+x1+","+y1;
-	if(animate1){polyline1.setAttribute("points",pt1);}
+	//if(animate1){polyline1.setAttribute("points",pt1);}
 	text1.innerHTML='x1=' + Math.round(x1)+' y1='+Math.round(y1)+'  T='+Math.trunc(i/360)+'  '+i+'^';
 	x2 =x1+r2*Math.cos(k2*(fr2/fr1)*Math.PI*i/180);
 	y2 =y1+r2*Math.sin(k2*(fr2/fr1)*Math.PI*i/180);	
 	rad2.setAttribute("d","M "+x1+" "+y1+" L "+x2+" "+y2+" Z");
 	pt2=pt2+" "+x2+","+y2;
-	if(animate2){polyline2.setAttribute("points",pt2);}
+	//if(animate2){polyline2.setAttribute("points",pt2);}
 	text2.innerHTML='x2=' + Math.round(x2)+' y2='+Math.round(y2);
-	if(i-n1>1){n1=i+1;await sleep(lag);}
+	if(i-n1>n2)
+   {
+    if(animate1){polyline1.setAttribute("points",pt1);}
+    if(animate2){polyline2.setAttribute("points",pt2);}
+    n1=i+1;await sleep(lag);
+   }
 	if(br1==1){br1=0;break;}
 	i=i+step2;
   }
