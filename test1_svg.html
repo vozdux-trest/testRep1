@@ -1,0 +1,159 @@
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>Музыка - взгляд с торца</title>    
+<style> 
+input[type=number] { width: 60px; }
+input[type=text]   { width: 7%; }
+label {
+    display: inline-block;
+    border: none;
+}
+input[type=radio] {display: none;}
+input[type=radio]:checked + label {
+    border: none; /*solid 1px blue;*/
+    border-radius: 15%;
+    background-color: DodgerBlue;
+}
+</style>  
+  </head>
+  <body>
+  <button type="button" onclick="run()">Run</button>
+  <button type="button" onclick="stop()">Stop</button>
+  <button type="button" onclick="clearAll()">Clear</button>
+  <button type="button" onclick="clearRadius()">Clear Radius</button>
+  <form id="frm1">
+  Frequency1: <input id="fr1" type="number" value=1>&nbsp&nbsp
+  Radius1: <input id="r1" type="number" value=100>&nbsp&nbsp
+  Rotate: 
+  <input id="rotate1" type="radio" name="rotate1" checked>
+  <label for="rotate1">&#8635</label> &nbsp
+  <input id="rotate1_2" type="radio" name="rotate1">
+  <label for="rotate1_2">&#8634</label> &nbsp
+  Pen size: <input id="penSize1" type="number" value=2>&nbsp&nbsp
+  Color: <input id="color1" type="text" value="green">&nbsp&nbsp
+  <input type="checkbox" id="animate1" name="animate1" checked> <label for="animate1">Animate</label>&nbsp&nbsp
+  <input type="checkbox" id="drawgraph1" name="drawgraph1" checked> <label for="drawgraph1">Draw graph</label>
+  <br>
+  Frequency2: <input id="fr2" type="number" value=2>&nbsp&nbsp
+  Radius2: <input id="r2" type="number" value=100>&nbsp&nbsp
+  Rotate: 
+  <input id="rotate2" type="radio" name="rotate2">
+  <label for="rotate2">&#8635</label> &nbsp
+  <input id="rotate2_2"type="radio" name="rotate2" checked>
+  <label for="rotate2_2">&#8634</label> &nbsp
+  Pen size: <input id="penSize2" type="number" value=1>&nbsp&nbsp
+  Color: <input id="color2" type="text" value="blue">&nbsp&nbsp
+  <input type="checkbox" id="animate2" name="animate2" checked> <label for="animate2">Animate</label>&nbsp&nbsp
+  <input type="checkbox" id="drawgraph2" name="drawgraph2" checked> <label for="drawgraph2">Draw graph</label>
+  <br>
+  Animation Lag: <input id="lag" type="number" value=10>&nbsp&nbsp
+  Step: <input id="step2" type="number" value=1>&nbsp&nbsp
+  <br><br>
+  </form>
+
+<svg height="600" width="900">
+  <text id="text0" x="150" y="50" font-size="smaller" fill="black">If you don't know what to do then just press the Run button.</text>
+  <text id="text1" x=650 y=50 font-family="sans-serif" font-size="smaller"/>
+  <text id="text2" x=650 y=70 font-family="sans-serif" font-size="smaller"/>
+  <path id="rad1" d="" stroke="blue" stroke-width="2" fill="none" />
+  <path id="rad2" d="" stroke="red" stroke-width="2" fill="none" />
+  <polyline id="polyline1" points="" stroke="green" stroke-width="2" fill="none" />
+  <polyline id="polyline2" points="" stroke="blue" stroke-width="1" fill="none" />
+  Sorry, your browser does not support inline SVG.
+</svg>
+    <script>
+function sleep(ms) {return new Promise(resolve => setTimeout(resolve, ms));}
+
+var br1=0; // break loop flag
+var pt1 = "";
+var pt2 = "";
+var text0=document.getElementById('text0');
+var text1=document.getElementById('text1');
+var text2=document.getElementById('text2');
+var rad1=document.getElementById('rad1');
+var rad2=document.getElementById('rad2');
+var polyline1=document.getElementById('polyline1');
+var polyline2=document.getElementById('polyline2');
+
+async function run(){
+//var r1=100;
+//var r2=100;
+//f2(); // clear drawing buffers
+var fr1=document.getElementById("fr1").value;
+var r1=Math.trunc(document.getElementById("r1").value);
+var fr2=document.getElementById("fr2").value;
+var r2=Math.trunc(document.getElementById("r2").value);
+var lag=Math.trunc(document.getElementById("lag").value);
+var penSize1=document.getElementById("penSize1").value;
+var penSize2=document.getElementById("penSize2").value;
+var color1=document.getElementById("color1").value;
+var color2=document.getElementById("color2").value;
+var animate1=document.getElementById("animate1").checked;
+var animate2=document.getElementById("animate2").checked;
+var drawgraph1=document.getElementById("drawgraph1").checked;
+var drawgraph2=document.getElementById("drawgraph2").checked;
+//var step1=Math.abs(document.getElementById("step1").value);
+var step2=Math.abs(document.getElementById("step2").value);
+polyline1.setAttribute("stroke-width",penSize1);
+polyline1.setAttribute("stroke",color1);
+polyline2.setAttribute("stroke-width",penSize2);
+polyline2.setAttribute("stroke",color2);
+rad1.setAttribute("stroke",color1);
+rad2.setAttribute("stroke",color2);
+text1.setAttribute("fill",color1);
+text2.setAttribute("fill",color2);
+x0=250;
+y0=250;
+x1=0;x2=0;y1=0;y2=0;
+xe1=x0+r1;xe2=xe1+r2;
+ye1=y0;ye2=y0;
+k1=1; // rotation direction: 1 - clockwise, -1 - anticlockwise
+if (document.getElementById("rotate1").checked==false){k1=-1;}
+k2=1; // rotation direction for the other radius
+if (document.getElementById("rotate2").checked==false){k2=-1;}
+n1=0;
+
+var i=step2; 
+//debugger;
+while (!(x1>=xe1 && x2>=xe2)) 
+// NB, x1, x2 are whole values at 0 degrees because of cosinus,
+//     so will compare to xe1/ye1, which are wholes.
+  {
+	// Note, angle for cos/sin is in radians
+	x1 =x0+r1*Math.cos(k1*Math.PI*i/180); 
+	y1 =y0+r1*Math.sin(k1*Math.PI*i/180);
+	rad1.setAttribute("d","M "+x0+" "+y0+" L "+x1+" "+y1+" Z");
+	pt1=pt1+" "+x1+","+y1;
+	if(animate1){polyline1.setAttribute("points",pt1);}
+	text1.innerHTML='x1=' + Math.round(x1)+' y1='+Math.round(y1)+'  T='+Math.trunc(i/360)+'  '+i+'^';
+	x2 =x1+r2*Math.cos(k2*(fr2/fr1)*Math.PI*i/180);
+	y2 =y1+r2*Math.sin(k2*(fr2/fr1)*Math.PI*i/180);	
+	rad2.setAttribute("d","M "+x1+" "+y1+" L "+x2+" "+y2+" Z");
+	pt2=pt2+" "+x2+","+y2;
+	if(animate2){polyline2.setAttribute("points",pt2);}
+	text2.innerHTML='x2=' + Math.round(x2)+' y2='+Math.round(y2);
+	if(i-n1>1){n1=i+1;await sleep(lag);}
+	if(br1==1){br1=0;break;}
+	i=i+step2;
+  }
+  if (drawgraph1){polyline1.setAttribute("points",pt1);}
+  if (drawgraph2){polyline2.setAttribute("points",pt2);}
+}
+function clearAll() {
+	if(pt1==""){rad1.setAttribute("d","Z");}
+	if(pt2==""){rad2.setAttribute("d","Z");}
+	text0.innerHTML="";
+	text1.innerHTML="";
+	text2.innerHTML="";
+	pt1="";polyline1.setAttribute("points",pt1);pt2="";polyline2.setAttribute("points",pt2);
+}
+function stop() {br1=1;}
+function clearRadius() {
+	rad1.setAttribute("d","Z");
+	rad2.setAttribute("d","Z");
+}
+    </script>
+    <br>---------end of page----------
+  </body>
+</html>
